@@ -1,13 +1,19 @@
 package com.emmanuelmess.simplechess.game
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.emmanuelmess.simplechess.Colors.*
 import com.github.bhlangonijr.chesslib.*
+import com.github.bhlangonijr.chesslib.move.Move
 import com.github.bhlangonijr.chesslib.move.MoveGenerator
+
 
 class GameBoard(
         boardWidth: Int,
@@ -15,6 +21,7 @@ class GameBoard(
 ): Image(), Disposable {
 
     val gameEnded = false
+    val isPlayingWhites = true
 
     private val pixmap = Pixmap(boardWidth, boardWidth, Pixmap.Format.RGBA8888)
     private val texture = Texture(boardWidth, boardWidth, Pixmap.Format.RGBA8888)
@@ -27,10 +34,43 @@ class GameBoard(
         addEventListener(BoardEventType.ON_UNDO_MOVE, inval)
         addEventListener(BoardEventType.ON_LOAD, inval)
     }
+    private val greenDots = mutableSetOf<Square>()
+    private var selected: Square? = null
+
+    init {
+        addListener(object : InputListener() {
+            override fun touchDown(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+                val file = (x / squareSideSize).toInt()
+                val rank = (y / squareSideSize).toInt()
+
+                val square = Square.squareAt(file + 8 * rank)
+
+                if(selected != null) {
+                    val move = Move(selected, square)
+
+                    if (greenDots.contains(square)) {
+                        selected = null
+                        greenDots.clear()
+                        boardState.doMove(move)
+                        return true
+                    }
+                }
+
+                if(boardState.getPiece(square) != Piece.NONE) {
+                    selected = square
+
+                    showMoves(square)
+                }
+
+                return true
+            }
+        })
+    }
 
     override fun layout() {
         drawBoard()
         drawPieces()
+        drawGreenDots()
         texture.draw(pixmap, 0, 0)
         drawable = TextureRegionDrawable(texture)
 
@@ -75,21 +115,26 @@ class GameBoard(
     }
 
     private fun showMoves(square: Square) {
-        MoveGenerator.generateLegalMoves(boardState)
-                .filter { it.from == square }
-                .map { it.to }
-                .forEach(this::drawGreenDot)
+        greenDots.clear()
+        greenDots.addAll(
+                MoveGenerator
+                        .generateLegalMoves(boardState)
+                        .filter { it.from == square }
+                        .map { it.to }
+        )
+
+        invalidate()
     }
     
     private fun fillSquare(x: Int, y: Int) {
-        pixmap.fillRectangle(x* squareSideSize, y * squareSideSize, squareSideSize, squareSideSize)
+        pixmap.fillRectangle(x * squareSideSize, y * squareSideSize, squareSideSize, squareSideSize)
     }
     
     private fun drawPiece(piece: Piece, square: Square) {
         if(piece == Piece.NONE) return
 
         val x = square.file.ordinal
-        val y = square.rank.ordinal
+        val y = convertRank(square.rank)
 
         pixmap.drawPixmap(
                 pieceTextures[piece],
@@ -97,23 +142,29 @@ class GameBoard(
                 0,
                 pieceTextures[piece]!!.width,
                 pieceTextures[piece]!!.height,
-                squareSideSize*x,
-                squareSideSize*y,
+                squareSideSize * x,
+                squareSideSize * y,
                 squareSideSize,
                 squareSideSize
         )
     }
 
+    private fun drawGreenDots() {
+        greenDots.forEach(this::drawGreenDot)
+    }
+
     private fun drawGreenDot(square: Square) {
         val x = square.file.ordinal
-        val y = square.rank.ordinal
+        val y = convertRank(square.rank)
         pixmap.setColor(GREEN_COLOR)
-        pixmap.fillCircle(x * squareSideSize + squareSideSize /2,
-                y * squareSideSize + squareSideSize /2, squareSideSize / 5)
+        pixmap.fillCircle(x * squareSideSize + squareSideSize / 2,
+                y * squareSideSize + squareSideSize / 2, squareSideSize / 5)
     }
 
     override fun dispose() {
         pixmap.dispose()
     }
+
+    private fun convertRank(rank: Rank) = if(isPlayingWhites) (-rank.ordinal + 7) else rank.ordinal
 
 }
