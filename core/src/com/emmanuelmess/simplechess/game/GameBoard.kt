@@ -5,8 +5,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
-import com.emmanuelmess.simplechess.Colors.DARK_COLOR
-import com.emmanuelmess.simplechess.Colors.LIGHT_COLOR
+import com.emmanuelmess.simplechess.Colors.*
 import com.emmanuelmess.simplechess.game.Piece.*
 
 class GameBoard(
@@ -14,9 +13,12 @@ class GameBoard(
         private val pieceTextures: Map<Piece, Pixmap>
 ): Image(), Disposable {
 
-    val pixmap = Pixmap(boardWidth, boardWidth, Pixmap.Format.RGBA8888)
-    val squareSideSize = boardWidth/8
-    val boardState = mapOf(
+    val gameEnded = false
+
+    private val pixmap = Pixmap(boardWidth, boardWidth, Pixmap.Format.RGBA8888)
+    private val texture = Texture(boardWidth, boardWidth, Pixmap.Format.RGBA8888)
+    private val squareSideSize = boardWidth/8
+    private val boardState = mutableMapOf(
             (0 to 0) to WHITE_ROOK,
             (1 to 0) to WHITE_KNIGHT,
             (2 to 0) to WHITE_BISHOP,
@@ -54,10 +56,13 @@ class GameBoard(
             (7 to 7) to BLACK_ROOK
     )
 
-    init {
+    override fun layout() {
         drawBoard()
         drawPieces()
-        drawable = TextureRegionDrawable(Texture(pixmap))
+        texture.draw(pixmap, 0, 0)
+        drawable = TextureRegionDrawable(texture)
+
+        super.layout()
     }
 
     private fun drawBoard() {
@@ -67,18 +72,18 @@ class GameBoard(
         pixmap.setColor(DARK_COLOR)
 
         val doOddRow: (y: Int) -> Unit = { y: Int ->
-            pixmap.fillSquare(1, y)
-            pixmap.fillSquare(3, y)
-            pixmap.fillSquare(5, y)
-            pixmap.fillSquare(7, y)
+            fillSquare(1, y)
+            fillSquare(3, y)
+            fillSquare(5, y)
+            fillSquare(7, y)
         }
 
         val doEvenRow: (y: Int) -> Unit = { y: Int ->
-            pixmap.fillSquare(0, y)
-            pixmap.fillSquare(2, y)
-            pixmap.fillSquare(4, y)
-            pixmap.fillSquare(6, y)
-            pixmap.fillSquare(8, y)
+            fillSquare(0, y)
+            fillSquare(2, y)
+            fillSquare(4, y)
+            fillSquare(6, y)
+            fillSquare(8, y)
         }
 
         doOddRow(0)
@@ -94,16 +99,28 @@ class GameBoard(
     private fun drawPieces() {
         for ((pos, piece) in boardState) {
             val (x, y) = pos
-            pixmap.drawPiece(piece, x, y)
+            drawPiece(piece, x, y)
         }
     }
-    
-    private fun Pixmap.fillSquare(x: Int, y: Int) {
-        fillRectangle(x* squareSideSize, y * squareSideSize, squareSideSize, squareSideSize)
+
+    private fun showMoves(positions: Set<Pair<Int, Int>>) {
+        for((x, y) in positions) {
+            drawGreenDot(x, y)
+        }
+    }
+
+    private fun movePiece(piece: Piece, x: Int, y: Int) {
+        boardState.values.remove(piece)
+        boardState[x to y] = piece
+        invalidate()
     }
     
-    private fun Pixmap.drawPiece(piece: Piece, x: Int, y: Int) {
-        drawPixmap(
+    private fun fillSquare(x: Int, y: Int) {
+        pixmap.fillRectangle(x* squareSideSize, y * squareSideSize, squareSideSize, squareSideSize)
+    }
+    
+    private fun drawPiece(piece: Piece, x: Int, y: Int) {
+        pixmap.drawPixmap(
                 pieceTextures[piece],
                 0,
                 0,
@@ -114,6 +131,13 @@ class GameBoard(
                 squareSideSize,
                 squareSideSize
         )
+    }
+
+    private fun drawGreenDot(x: Int, y: Int) {
+        if(boardState[x to y] == null) {
+            pixmap.setColor(GREEN_COLOR)
+            pixmap.fillCircle(x* squareSideSize, y * squareSideSize, squareSideSize/4)
+        }
     }
 
     override fun dispose() {

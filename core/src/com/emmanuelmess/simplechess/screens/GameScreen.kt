@@ -21,6 +21,7 @@ import com.emmanuelmess.simplechess.game.GameBoard
 import com.emmanuelmess.simplechess.game.GameType
 import com.emmanuelmess.simplechess.game.Piece
 import com.emmanuelmess.simplechess.game.Piece.*
+import com.emmanuelmess.simplechess.server.Connection
 
 class GameScreen(
         private val globalData: GlobalData,
@@ -126,6 +127,8 @@ class GameScreen(
             setFillParent(true)
         })
 
+        val gameBoard = GameBoard(1200, pieceTextures)
+
         val table = Table(skin80).apply {
             add(Label(globalData.translate["game"], skin120)).colspan(3).left().top()
             row().padTop(100f)
@@ -133,28 +136,16 @@ class GameScreen(
             add()
             add(Label("${gameType.time}:00", skin)).right()
             row()
-            add(GameBoard(1200, pieceTextures)).colspan(3).center()
+            add(gameBoard).colspan(3).center()
             row()
             add(TextButton("undo", skin).apply {
-                addListener(object : ChangeListener() {
-                    override fun changed(event: ChangeEvent?, actor: Actor?) {
-                        TODO()
-                    }
-                })
+                addListener(Connection::undo)
             })
-            add(TextButton("b", skin).apply {
-                addListener(object : ChangeListener() {
-                    override fun changed(event: ChangeEvent?, actor: Actor?) {
-                        TODO()
-                    }
-                })
+            add(TextButton("draw", skin).apply {
+                addListener(Connection::draw)
             })
-            add(TextButton("c", skin).apply {
-                addListener(object : ChangeListener() {
-                    override fun changed(event: ChangeEvent?, actor: Actor?) {
-                        TODO()
-                    }
-                })
+            add(TextButton("surrender", skin).apply {
+                addListener(Connection::surrender)
             })
             setFillParent(true)
             debug = true
