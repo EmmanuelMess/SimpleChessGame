@@ -5,10 +5,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -30,7 +26,7 @@ class SimpleChessGame : ApplicationAdapter() {
 
     private lateinit var textViewport: FitViewport
 
-    private lateinit var mainMenuScreen: MainMenuScreen
+    private var currentScreen: Screen? = null
 
     override fun create() {
         Gdx.graphics.isContinuousRendering = false
@@ -48,14 +44,22 @@ class SimpleChessGame : ApplicationAdapter() {
             finishLoading()
         }
 
-        mainMenuScreen = MainMenuScreen(textViewport, globalAssetManager.get("i18n/SimpleChess"))
+        changeScreen(MainMenuScreen(
+                textViewport,
+                globalAssetManager.get("i18n/SimpleChess"),
+                this::changeScreen
+        ))
+    }
 
-        mainMenuScreen.create()
+    fun changeScreen(screen: Screen) {
+        currentScreen?.dispose()
+        screen.create()
+        currentScreen = screen
     }
 
     override fun resize(width: Int, height: Int) {
         viewport.update(width, height, true)
-        mainMenuScreen.resize(width, height)
+        currentScreen?.resize(width, height)
     }
 
     override fun render() {
@@ -63,11 +67,11 @@ class SimpleChessGame : ApplicationAdapter() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT or GL20.GL_DEPTH_BUFFER_BIT
                 or if(Gdx.graphics.bufferFormat.coverageSampling) GL20.GL_COVERAGE_BUFFER_BIT_NV else 0)
 
-        mainMenuScreen.render()
+        currentScreen?.render()
     }
 
     override fun dispose() {
-        mainMenuScreen.dispose()
+        currentScreen?.dispose()
         globalAssetManager.dispose()
     }
 }
