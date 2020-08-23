@@ -19,9 +19,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.emmanuelmess.simplechess.*
 import com.emmanuelmess.simplechess.game.GameBoard
 import com.emmanuelmess.simplechess.game.GameType
-import com.emmanuelmess.simplechess.game.Piece
-import com.emmanuelmess.simplechess.game.Piece.*
 import com.emmanuelmess.simplechess.server.Connection
+import com.github.bhlangonijr.chesslib.Piece
+import com.github.bhlangonijr.chesslib.Piece.*
 
 class GameScreen(
         private val globalData: GlobalData,

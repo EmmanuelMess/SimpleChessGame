@@ -6,7 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.emmanuelmess.simplechess.Colors.*
-import com.emmanuelmess.simplechess.game.Piece.*
+import com.github.bhlangonijr.chesslib.*
+import com.github.bhlangonijr.chesslib.move.MoveGenerator
 
 class GameBoard(
         boardWidth: Int,
@@ -18,43 +19,14 @@ class GameBoard(
     private val pixmap = Pixmap(boardWidth, boardWidth, Pixmap.Format.RGBA8888)
     private val texture = Texture(boardWidth, boardWidth, Pixmap.Format.RGBA8888)
     private val squareSideSize = boardWidth/8
-    private val boardState = mutableMapOf(
-            (0 to 0) to WHITE_ROOK,
-            (1 to 0) to WHITE_KNIGHT,
-            (2 to 0) to WHITE_BISHOP,
-            (3 to 0) to WHITE_KING,
-            (4 to 0) to WHITE_QUEEN,
-            (5 to 0) to WHITE_BISHOP,
-            (6 to 0) to WHITE_KNIGHT,
-            (7 to 0) to WHITE_ROOK,
+    private val boardState = Board().apply {
+        val inval: (BoardEvent) -> Unit = { invalidate() }
 
-            (0 to 1) to WHITE_PAWN,
-            (1 to 1) to WHITE_PAWN,
-            (2 to 1) to WHITE_PAWN,
-            (3 to 1) to WHITE_PAWN,
-            (4 to 1) to WHITE_PAWN,
-            (5 to 1) to WHITE_PAWN,
-            (6 to 1) to WHITE_PAWN,
-            (7 to 1) to WHITE_PAWN,
-            
-            (0 to 6) to BLACK_PAWN,
-            (1 to 6) to BLACK_PAWN,
-            (2 to 6) to BLACK_PAWN,
-            (3 to 6) to BLACK_PAWN,
-            (4 to 6) to BLACK_PAWN,
-            (5 to 6) to BLACK_PAWN,
-            (6 to 6) to BLACK_PAWN,
-            (7 to 6) to BLACK_PAWN,
-            
-            (0 to 7) to BLACK_ROOK,
-            (1 to 7) to BLACK_KNIGHT,
-            (2 to 7) to BLACK_BISHOP,
-            (3 to 7) to BLACK_KING,
-            (4 to 7) to BLACK_QUEEN,
-            (5 to 7) to BLACK_BISHOP,
-            (6 to 7) to BLACK_KNIGHT,
-            (7 to 7) to BLACK_ROOK
-    )
+        isEnableEvents = true
+        addEventListener(BoardEventType.ON_MOVE, inval)
+        addEventListener(BoardEventType.ON_UNDO_MOVE, inval)
+        addEventListener(BoardEventType.ON_LOAD, inval)
+    }
 
     override fun layout() {
         drawBoard()
@@ -97,29 +69,28 @@ class GameBoard(
     }
 
     private fun drawPieces() {
-        for ((pos, piece) in boardState) {
-            val (x, y) = pos
-            drawPiece(piece, x, y)
+        for (square in Square.values()) {
+            drawPiece(boardState.getPiece(square), square)
         }
     }
 
-    private fun showMoves(positions: Set<Pair<Int, Int>>) {
-        for((x, y) in positions) {
-            drawGreenDot(x, y)
-        }
-    }
-
-    private fun movePiece(piece: Piece, x: Int, y: Int) {
-        boardState.values.remove(piece)
-        boardState[x to y] = piece
-        invalidate()
+    private fun showMoves(square: Square) {
+        MoveGenerator.generateLegalMoves(boardState)
+                .filter { it.from == square }
+                .map { it.to }
+                .forEach(this::drawGreenDot)
     }
     
     private fun fillSquare(x: Int, y: Int) {
         pixmap.fillRectangle(x* squareSideSize, y * squareSideSize, squareSideSize, squareSideSize)
     }
     
-    private fun drawPiece(piece: Piece, x: Int, y: Int) {
+    private fun drawPiece(piece: Piece, square: Square) {
+        if(piece == Piece.NONE) return
+
+        val x = square.file.ordinal
+        val y = square.rank.ordinal
+
         pixmap.drawPixmap(
                 pieceTextures[piece],
                 0,
@@ -133,11 +104,12 @@ class GameBoard(
         )
     }
 
-    private fun drawGreenDot(x: Int, y: Int) {
-        if(boardState[x to y] == null) {
-            pixmap.setColor(GREEN_COLOR)
-            pixmap.fillCircle(x* squareSideSize, y * squareSideSize, squareSideSize/4)
-        }
+    private fun drawGreenDot(square: Square) {
+        val x = square.file.ordinal
+        val y = square.rank.ordinal
+        pixmap.setColor(GREEN_COLOR)
+        pixmap.fillCircle(x * squareSideSize + squareSideSize /2,
+                y * squareSideSize + squareSideSize /2, squareSideSize / 5)
     }
 
     override fun dispose() {
