@@ -1,6 +1,7 @@
 package com.emmanuelmess.simplechess.game
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Vector3
@@ -71,6 +72,7 @@ class GameBoard(
         drawBoard()
         drawPieces()
         drawGreenDots()
+        drawCheckIndicator()
         texture.draw(pixmap, 0, 0)
         drawable = TextureRegionDrawable(texture)
 
@@ -154,9 +156,19 @@ class GameBoard(
     }
 
     private fun drawGreenDot(square: Square) {
+        drawDot(square, GREEN_COLOR)
+    }
+
+    private fun drawCheckIndicator() {
+        if(boardState.isKingAttacked) {
+            drawDot(boardState.getKingSquare(boardState.sideToMove), Color.RED)
+        }
+    }
+
+    private fun drawDot(square: Square, color: Color) {
         val x = square.file.ordinal
         val y = convertRank(square.rank)
-        pixmap.setColor(GREEN_COLOR)
+        pixmap.setColor(color)
         pixmap.fillCircle(x * squareSideSize + squareSideSize / 2,
                 y * squareSideSize + squareSideSize / 2, squareSideSize / 5)
     }
