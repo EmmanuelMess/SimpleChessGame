@@ -13,8 +13,8 @@ import com.emmanuelmess.simplechess.screens.MainMenuScreen
 class SimpleChessGame : ApplicationAdapter() {
 
     object Size {
-        const val WIDTH = 1000f
-        const val HEIGHT = 16 * WIDTH / 9
+        const val WIDTH = 1440f
+        const val HEIGHT = 2560f
 
         const val C = 10f
     }
@@ -37,7 +37,7 @@ class SimpleChessGame : ApplicationAdapter() {
         }
         viewport = FillViewport(Size.WIDTH, Size.HEIGHT, camera)
 
-        textViewport = FitViewport(1440f, 2560f)
+        textViewport = FitViewport(Size.WIDTH, Size.HEIGHT)
 
         globalAssetManager = AssetManager().apply {
             load("i18n/SimpleChess", I18NBundle::class.java)
@@ -45,15 +45,19 @@ class SimpleChessGame : ApplicationAdapter() {
         }
 
         changeScreen(MainMenuScreen(
-                textViewport,
-                globalAssetManager.get("i18n/SimpleChess"),
-                this::changeScreen
+                GlobalData(
+                        textViewport,
+                        globalAssetManager["i18n/SimpleChess"],
+                        this::changeScreen,
+                        viewport
+                )
         ))
     }
 
     fun changeScreen(screen: Screen) {
         currentScreen?.dispose()
         screen.create()
+        screen.resize(viewport.screenWidth, viewport.screenHeight)
         currentScreen = screen
     }
 

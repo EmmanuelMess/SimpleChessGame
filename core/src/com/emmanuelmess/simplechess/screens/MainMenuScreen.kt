@@ -16,14 +16,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
 
 
 class MainMenuScreen(
-        private val textViewport: FitViewport,
-        private val translate: I18NBundle,
-        private val changeScreen: (Screen) -> Unit
-): Screen(textViewport, translate, changeScreen) {
+        private val globalData: GlobalData
+): Screen(globalData) {
     private lateinit var assetManager: AssetManager
     private lateinit var stage: Stage
     private lateinit var skin80: Skin
@@ -89,7 +88,7 @@ class MainMenuScreen(
             })
         }
 
-        stage = Stage(textViewport)
+        stage = Stage(globalData.textViewport)
 
         val img: Texture = assetManager["icon/lichess grey.png"]
         stage.addActor(Container(Image(img)).apply {
@@ -97,22 +96,22 @@ class MainMenuScreen(
         })
 
         val table = Table(skin80).apply {
-            add(Label(translate["name"], skin120)).padTop(100f).expandX().top()
+            add(Label(globalData.translate["name"], skin120)).padTop(100f).expandX().top()
             row()
-            add(Label(translate["username"], skin)).padTop(100f).left().expandX()
+            add(Label(globalData.translate["username"], skin)).padTop(100f).left().expandX()
             row()
             add(TextField("", skin)).fillX().left()
             row()
-            add(Label(translate["password"], skin)).padTop(100f).left().expandX()
+            add(Label(globalData.translate["password"], skin)).padTop(100f).left().expandX()
             row()
             add(TextField("", skin).apply {
                 isPasswordMode = true
             }).fillX().left()
             row()
-            add(TextButton(translate["login"], skin).apply {
+            add(TextButton(globalData.translate["login"], skin).apply {
                 addListener(object : ChangeListener() {
                     override fun changed(event: ChangeEvent?, actor: Actor?) {
-                        changeScreen(GameTypeSelectScreen(textViewport, translate, changeScreen))
+                        globalData.changeScreen(GameTypeSelectScreen(globalData))
                     }
                 })
             }).padTop(100f)

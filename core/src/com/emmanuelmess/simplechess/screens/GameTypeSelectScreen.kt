@@ -19,13 +19,12 @@ import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.emmanuelmess.simplechess.GameCategory
 import com.emmanuelmess.simplechess.GameType
+import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
 
 class GameTypeSelectScreen(
-        private val textViewport: FitViewport,
-        private val translate: I18NBundle,
-        private val changeScreen: (Screen) -> Unit
-) : Screen(textViewport, translate, changeScreen) {
+        private val globalData: GlobalData
+) : Screen(globalData) {
     private lateinit var assetManager: AssetManager
     private lateinit var stage: Stage
     private lateinit var skin80: Skin
@@ -90,7 +89,7 @@ class GameTypeSelectScreen(
                 fontColor = Color.BLACK
             })
         }
-        stage = Stage(textViewport)
+        stage = Stage(globalData.textViewport)
 
         val img: Texture = assetManager["icon/lichess grey.png"]
         stage.addActor(Container(Image(img)).apply {
@@ -98,7 +97,7 @@ class GameTypeSelectScreen(
         })
 
         val table = Table(skin80).apply {
-            add(Label(translate["choose"], skin120)).padTop(100f).colspan(3).top()
+            add(Label(globalData.translate["choose"], skin120)).padTop(100f).colspan(3).top()
             row()
             category(
                     "bullet",
@@ -124,7 +123,7 @@ class GameTypeSelectScreen(
                 GameType(null, 30, 20, GameCategory.CLASSIC)
             )
             row()
-            add(Label(translate["custom"], skin)).padTop(100f).left().colspan(3)
+            add(Label(globalData.translate["custom"], skin)).padTop(100f).left().colspan(3)
             row()
             add(TextButton("+", skin).apply {
                 addListener(object : ChangeListener() {
@@ -144,7 +143,7 @@ class GameTypeSelectScreen(
 
     private fun Table.category(categoryName: String, a: GameType, b: GameType, c: GameType? = null) {
         row()
-        add(Label(translate[categoryName], skin)).padTop(100f).left().colspan(3)
+        add(Label(globalData.translate[categoryName], skin)).padTop(100f).left().colspan(3)
         row()
         add(buttonForGameType(a, skin))
         add(buttonForGameType(b, skin))
@@ -158,7 +157,7 @@ class GameTypeSelectScreen(
         return TextButton(a.getString(), skin).apply {
             addListener(object : ChangeListener() {
                 override fun changed(event: ChangeEvent?, actor: Actor?) {
-                    changeScreen(GameScreen(textViewport, translate, changeScreen))
+                    globalData.changeScreen(GameScreen(globalData, a))
                 }
             })
         }
