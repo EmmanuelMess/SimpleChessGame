@@ -11,14 +11,11 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
-import com.badlogic.gdx.utils.I18NBundle
-import com.badlogic.gdx.utils.viewport.FitViewport
-import com.emmanuelmess.simplechess.GameCategory
-import com.emmanuelmess.simplechess.GameType
+import com.emmanuelmess.simplechess.game.GameCategory
+import com.emmanuelmess.simplechess.game.GameType
 import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
 

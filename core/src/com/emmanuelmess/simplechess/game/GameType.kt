@@ -1,4 +1,4 @@
-package com.emmanuelmess.simplechess
+package com.emmanuelmess.simplechess.game
 
 enum class GameCategory {
     BULLET, BLITZ, RAPID, CLASSIC, CUSTOM

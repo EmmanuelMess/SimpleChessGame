@@ -5,6 +5,7 @@ import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.assets.loaders.TextureLoader
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
@@ -16,6 +17,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.emmanuelmess.simplechess.*
+import com.emmanuelmess.simplechess.game.GameBoard
+import com.emmanuelmess.simplechess.game.GameType
+import com.emmanuelmess.simplechess.game.Piece
+import com.emmanuelmess.simplechess.game.Piece.*
 
 class GameScreen(
         private val globalData: GlobalData,
@@ -23,9 +28,9 @@ class GameScreen(
 ) : Screen(globalData) {
     private lateinit var assetManager: AssetManager
     private lateinit var stage: Stage
-    private lateinit var shapeRenderer: ShapeRenderer
     private lateinit var skin80: Skin
     private lateinit var skin120: Skin
+    private lateinit var pieceTextures: Map<Piece, Pixmap>
 
     override fun create() {
         assetManager = AssetManager().apply {
@@ -45,6 +50,19 @@ class GameScreen(
                 fontFileName = "fonts/roboto-light-latin.ttf"
                 fontParameters.size = 80
             })
+
+            load("images/pieces/bB.png", Pixmap::class.java)
+            load("images/pieces/bK.png", Pixmap::class.java)
+            load("images/pieces/bN.png", Pixmap::class.java)
+            load("images/pieces/bP.png", Pixmap::class.java)
+            load("images/pieces/bQ.png", Pixmap::class.java)
+            load("images/pieces/bR.png", Pixmap::class.java)
+            load("images/pieces/wB.png", Pixmap::class.java)
+            load("images/pieces/wK.png", Pixmap::class.java)
+            load("images/pieces/wN.png", Pixmap::class.java)
+            load("images/pieces/wP.png", Pixmap::class.java)
+            load("images/pieces/wQ.png", Pixmap::class.java)
+            load("images/pieces/wR.png", Pixmap::class.java)
 
             finishLoading()
         }
@@ -86,7 +104,21 @@ class GameScreen(
                 fontColor = Color.BLACK
             })
         }
-        shapeRenderer = ShapeRenderer()
+        pieceTextures = mapOf(
+                BLACK_PAWN to assetManager["images/pieces/bP.png"],
+                BLACK_ROOK to  assetManager["images/pieces/bR.png"],
+                BLACK_BISHOP to  assetManager["images/pieces/bB.png"],
+                BLACK_KNIGHT to assetManager["images/pieces/bN.png"],
+                BLACK_QUEEN to assetManager["images/pieces/bQ.png"],
+                BLACK_KING to assetManager["images/pieces/bK.png"],
+
+                WHITE_PAWN to assetManager["images/pieces/wP.png"],
+                WHITE_ROOK to assetManager["images/pieces/wR.png"],
+                WHITE_BISHOP to assetManager["images/pieces/wB.png"],
+                WHITE_KNIGHT to assetManager["images/pieces/wN.png"],
+                WHITE_QUEEN to assetManager["images/pieces/wQ.png"],
+                WHITE_KING to assetManager["images/pieces/wK.png"]
+        )
         stage = Stage(globalData.textViewport)
 
         val img: Texture = assetManager["icon/lichess grey.png"]
@@ -101,7 +133,7 @@ class GameScreen(
             add()
             add(Label("${gameType.time}:00", skin)).right()
             row()
-            add(GameBoard(1200)).colspan(3).center()
+            add(GameBoard(1200, pieceTextures)).colspan(3).center()
             row()
             add(TextButton("undo", skin).apply {
                 addListener(object : ChangeListener() {
@@ -138,8 +170,6 @@ class GameScreen(
     }
 
     override fun render() {
-        shapeRenderer.projectionMatrix = globalData.viewport.camera.combined
-
         stage.draw()
     }
 
