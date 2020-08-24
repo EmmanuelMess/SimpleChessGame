@@ -15,7 +15,6 @@ import com.github.bhlangonijr.chesslib.*
 import com.github.bhlangonijr.chesslib.move.Move
 import com.github.bhlangonijr.chesslib.move.MoveGenerator
 
-
 class GameBoard(
         boardWidth: Int,
         private val pieceTextures: Map<Piece, Pixmap>
@@ -46,12 +45,20 @@ class GameBoard(
 
                 val square = Square.squareAt(file + 8 * rank)
 
+                val reset = {
+                    selected = null
+                    greenDots.clear()
+                }
+
+                if(selected == square) {
+                    reset()
+                }
+
                 if(selected != null) {
                     val move = Move(selected, square)
 
                     if (greenDots.contains(square)) {
-                        selected = null
-                        greenDots.clear()
+                        reset()
                         boardState.doMove(move)
                         return true
                     }
