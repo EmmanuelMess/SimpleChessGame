@@ -11,14 +11,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.emmanuelmess.simplechess.*
-import com.emmanuelmess.simplechess.game.GameBoard
+import com.emmanuelmess.simplechess.game.BoardActor
+import com.emmanuelmess.simplechess.game.GameManager
+import com.emmanuelmess.simplechess.game.GameManager.Size.BOARD_WIDTH
 import com.emmanuelmess.simplechess.game.GameType
+import com.emmanuelmess.simplechess.game.SquareActor
 import com.emmanuelmess.simplechess.server.Connection
 import com.github.bhlangonijr.chesslib.Piece
 import com.github.bhlangonijr.chesslib.Piece.*
@@ -31,7 +31,10 @@ class GameScreen(
     private lateinit var stage: Stage
     private lateinit var skin80: Skin
     private lateinit var skin120: Skin
-    private lateinit var pieceTextures: Map<Piece, Pixmap>
+    private lateinit var pieceTextures: Map<Piece, Texture>
+    private lateinit var greenDotTexture: Texture
+    private lateinit var redDotTexture: Texture
+    private lateinit var boardTexture: Texture
 
     override fun create() {
         assetManager = AssetManager().apply {
@@ -52,18 +55,18 @@ class GameScreen(
                 fontParameters.size = 80
             })
 
-            load("images/pieces/bB.png", Pixmap::class.java)
-            load("images/pieces/bK.png", Pixmap::class.java)
-            load("images/pieces/bN.png", Pixmap::class.java)
-            load("images/pieces/bP.png", Pixmap::class.java)
-            load("images/pieces/bQ.png", Pixmap::class.java)
-            load("images/pieces/bR.png", Pixmap::class.java)
-            load("images/pieces/wB.png", Pixmap::class.java)
-            load("images/pieces/wK.png", Pixmap::class.java)
-            load("images/pieces/wN.png", Pixmap::class.java)
-            load("images/pieces/wP.png", Pixmap::class.java)
-            load("images/pieces/wQ.png", Pixmap::class.java)
-            load("images/pieces/wR.png", Pixmap::class.java)
+            load("images/pieces/bB.png", Texture::class.java)
+            load("images/pieces/bK.png", Texture::class.java)
+            load("images/pieces/bN.png", Texture::class.java)
+            load("images/pieces/bP.png", Texture::class.java)
+            load("images/pieces/bQ.png", Texture::class.java)
+            load("images/pieces/bR.png", Texture::class.java)
+            load("images/pieces/wB.png", Texture::class.java)
+            load("images/pieces/wK.png", Texture::class.java)
+            load("images/pieces/wN.png", Texture::class.java)
+            load("images/pieces/wP.png", Texture::class.java)
+            load("images/pieces/wQ.png", Texture::class.java)
+            load("images/pieces/wR.png", Texture::class.java)
 
             finishLoading()
         }
@@ -120,6 +123,20 @@ class GameScreen(
                 WHITE_QUEEN to assetManager["images/pieces/wQ.png"],
                 WHITE_KING to assetManager["images/pieces/wK.png"]
         )
+        Pixmap(SquareActor.Size.SQUARE_WIDTH, SquareActor.Size.SQUARE_WIDTH, Pixmap.Format.RGBA8888).also {
+            it.setColor(Colors.GREEN_COLOR)
+            it.fillCircle(SquareActor.Size.SQUARE_WIDTH / 2, SquareActor.Size.SQUARE_WIDTH / 2, SquareActor.Size.SQUARE_WIDTH / 5)
+            greenDotTexture = Texture(it)
+        }
+        Pixmap(SquareActor.Size.SQUARE_WIDTH, SquareActor.Size.SQUARE_WIDTH, Pixmap.Format.RGBA8888).also {
+            it.setColor(Color.RED)
+            it.fillCircle(SquareActor.Size.SQUARE_WIDTH / 2, SquareActor.Size.SQUARE_WIDTH / 2, SquareActor.Size.SQUARE_WIDTH / 5)
+            redDotTexture = Texture(it)
+        }
+        Pixmap(BOARD_WIDTH, BOARD_WIDTH, Pixmap.Format.RGBA8888).also {
+            drawBoard(it)
+            boardTexture = Texture(it)
+        }
         stage = Stage(globalData.textViewport)
 
         val img: Texture = assetManager["icon/lichess grey.png"]
@@ -127,7 +144,7 @@ class GameScreen(
             setFillParent(true)
         })
 
-        val gameBoard = GameBoard(1200, pieceTextures)
+        val gameBoard = GameManager(pieceTextures, greenDotTexture, redDotTexture, boardTexture)
 
         val table = Table(skin80).apply {
             add(Label(globalData.translate["game"], skin120)).colspan(3).left().top()
@@ -154,6 +171,41 @@ class GameScreen(
         stage.addActor(table)
 
         Gdx.input.inputProcessor = stage
+    }
+
+    private fun drawBoard(pixmap: Pixmap) {
+        pixmap.setColor(Colors.LIGHT_COLOR)
+        pixmap.fillRectangle(0, 0, pixmap.width, pixmap.height)
+
+        pixmap.setColor(Colors.DARK_COLOR)
+
+        val doOddRow: (y: Int) -> Unit = { y: Int ->
+            fillSquare(pixmap, 1, y)
+            fillSquare(pixmap, 3, y)
+            fillSquare(pixmap, 5, y)
+            fillSquare(pixmap, 7, y)
+        }
+
+        val doEvenRow: (y: Int) -> Unit = { y: Int ->
+            fillSquare(pixmap, 0, y)
+            fillSquare(pixmap, 2, y)
+            fillSquare(pixmap, 4, y)
+            fillSquare(pixmap, 6, y)
+            fillSquare(pixmap, 8, y)
+        }
+
+        doOddRow(0)
+        doEvenRow(1)
+        doOddRow(2)
+        doEvenRow(3)
+        doOddRow(4)
+        doEvenRow(5)
+        doOddRow(6)
+        doEvenRow(7)
+    }
+
+    private fun fillSquare(pixmap: Pixmap, x: Int, y: Int) {
+        pixmap.fillRectangle(x * SquareActor.Size.SQUARE_WIDTH, y * SquareActor.Size.SQUARE_WIDTH, SquareActor.Size.SQUARE_WIDTH, SquareActor.Size.SQUARE_WIDTH)
     }
 
     override fun resize(width: Int, height: Int) {
