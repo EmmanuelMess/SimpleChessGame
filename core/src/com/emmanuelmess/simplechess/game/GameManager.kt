@@ -84,15 +84,14 @@ class GameManager(
         showMoves(square)
     }
 
-    private fun onTapDot(square: Square, isPromoting: Boolean, isCastling: Boolean) {
+    private fun onTapDot(square: Square, isPromoting: Boolean) {
         if (selected != null) {
             if(isPromoting) {
                 onPromote() { chosenPiece: Piece ->
                     val move = Move(selected, square, chosenPiece)
 
                     if (indexedDots[square]?.isVisible == true) {
-                        selected = null
-                        greenDotGroup.children.map { it.isVisible = false }
+                        unselect()
                         boardState.doMove(move)
                     }
                 }
@@ -100,10 +99,8 @@ class GameManager(
                 val move = Move(selected, square)
 
                 if (indexedDots[square]?.isVisible == true) {
-                    selected = null
-                    greenDotGroup.children.map { it.isVisible = false }
+                    unselect()
                     boardState.doMove(move)
-                    return
                 }
             }
         }
@@ -134,11 +131,35 @@ class GameManager(
             }
         }
 
+        val castlings = listOf(Constants.DEFAULT_WHITE_OO, Constants.DEFAULT_WHITE_OOO, Constants.DEFAULT_BLACK_OO, Constants.DEFAULT_BLACK_OOO)
+        val isCastling = castlings.contains(move) && boardState.getPiece(move.to).pieceType == PieceType.KING
+
+        if(isCastling) {
+            val rookMove = when(move) {
+                Constants.DEFAULT_WHITE_OO -> Constants.DEFAULT_WHITE_ROOK_OO
+                Constants.DEFAULT_WHITE_OOO -> Constants.DEFAULT_WHITE_ROOK_OOO
+                Constants.DEFAULT_BLACK_OO -> Constants.DEFAULT_BLACK_ROOK_OO
+                Constants.DEFAULT_BLACK_OOO -> Constants.DEFAULT_BLACK_ROOK_OOO
+                else -> null
+            }
+            onMove(rookMove!!)
+        }
+
         if (boardState.isKingAttacked) {
             redDotActor.isVisible = true
             redDotActor.square = boardState.getKingSquare(boardState.sideToMove)
         } else {
             redDotActor.isVisible = false
+        }
+    }
+
+    private fun unselect() {
+        selected = null
+        greenDotGroup.children.map {
+            it as GreenDotActor
+        }.forEach {
+            it.isPromoting = false
+            it.isVisible = false
         }
     }
 

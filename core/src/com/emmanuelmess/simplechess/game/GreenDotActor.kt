@@ -8,16 +8,15 @@ import com.github.bhlangonijr.chesslib.Square
 
 class GreenDotActor(
         isPlayingWhites: Boolean,
-        onTap: (Square, Boolean, Boolean) -> Unit,
+        onTap: (Square, Boolean) -> Unit,
         texture: Texture
 ): SquareActor(isPlayingWhites, texture) {
     public var isPromoting: Boolean = false
-    public var isCastling: Boolean = false
 
     init {
         addListener(object : InputListener() {
             override fun touchDown(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int): Boolean {
-                onTap(square, isPromoting, isCastling)
+                onTap(square, isPromoting)
                 return true
             }
         })
