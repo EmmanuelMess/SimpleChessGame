@@ -8,11 +8,15 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.emmanuelmess.simplechess.*
 import com.emmanuelmess.simplechess.game.BoardActor
 import com.emmanuelmess.simplechess.game.GameManager
@@ -22,6 +26,7 @@ import com.emmanuelmess.simplechess.game.SquareActor
 import com.emmanuelmess.simplechess.server.Connection
 import com.github.bhlangonijr.chesslib.Piece
 import com.github.bhlangonijr.chesslib.Piece.*
+import com.github.bhlangonijr.chesslib.PieceType
 
 class GameScreen(
         private val globalData: GlobalData,
@@ -29,12 +34,15 @@ class GameScreen(
 ) : Screen(globalData) {
     private lateinit var assetManager: AssetManager
     private lateinit var stage: Stage
+    private lateinit var promotingSelection: Table
+    private var promotionCallback: ((chosenPiece: Piece) -> Unit)? = null
     private lateinit var skin80: Skin
     private lateinit var skin120: Skin
     private lateinit var pieceTextures: Map<Piece, Texture>
     private lateinit var greenDotTexture: Texture
     private lateinit var redDotTexture: Texture
     private lateinit var boardTexture: Texture
+    private lateinit var popupPieceTextures: Map<Piece, SpriteDrawable>
 
     override fun create() {
         assetManager = AssetManager().apply {
@@ -137,6 +145,17 @@ class GameScreen(
             drawBoard(it)
             boardTexture = Texture(it)
         }
+        popupPieceTextures = pieceTextures
+                .filter {
+                    setOf(PieceType.BISHOP, PieceType.QUEEN, PieceType.KNIGHT, PieceType.ROOK).contains(it.key.pieceType)
+                }.map { (piece, texture) ->
+                    piece to Sprite(texture).apply {
+                        setSize((BOARD_WIDTH/4).toFloat(), (BOARD_WIDTH/4).toFloat())
+                    }
+                }.map { (piece, sprite) ->
+                    piece to SpriteDrawable(sprite)
+                }.toMap()
+
         stage = Stage(globalData.textViewport)
 
         val img: Texture = assetManager["icon/lichess grey.png"]
@@ -144,7 +163,10 @@ class GameScreen(
             setFillParent(true)
         })
 
-        val gameBoard = GameManager(pieceTextures, greenDotTexture, redDotTexture, boardTexture)
+        val gameBoard = GameManager(pieceTextures, greenDotTexture, redDotTexture, boardTexture) { callback: (chosenPiece: Piece) -> Unit ->
+            promotionCallback = callback
+            promotingSelection.isVisible = true
+        }
 
         val table = Table(skin80).apply {
             add(Label(globalData.translate["game"], skin120)).colspan(3).left().top()
@@ -156,19 +178,42 @@ class GameScreen(
             add(gameBoard).colspan(3).center()
             row()
             add(TextButton("undo", skin).apply {
-                addListener(Connection::undo)
+                listener(Connection::undo)
             })
             add(TextButton("draw", skin).apply {
-                addListener(Connection::draw)
+                listener(Connection::draw)
             })
             add(TextButton("surrender", skin).apply {
-                addListener(Connection::surrender)
+                listener(Connection::surrender)
             })
             setFillParent(true)
             debug = true
         }
 
         stage.addActor(table)
+
+        promotingSelection = Table(skin80).apply {
+            add(Label(globalData.translate["choose_piece"], skin120)).colspan(3).left().top()
+            row().padTop(100f)
+
+            val pieces =
+                    if(gameBoard.isPlayingWhites) listOf(WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN)
+                    else listOf(BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN)
+            pieces.forEach {
+                add(ImageButton(popupPieceTextures[it]).apply {
+                    image.width = (BOARD_WIDTH/4).toFloat()
+                    listener {
+                        promotingSelection.isVisible = false
+                        promotionCallback?.invoke(it)
+                    }
+                })
+            }
+            setFillParent(true)
+            debug = true
+            isVisible = false
+        }
+
+        stage.addActor(promotingSelection)
 
         Gdx.input.inputProcessor = stage
     }

@@ -10,10 +10,11 @@ import com.github.bhlangonijr.chesslib.move.Move
 import com.github.bhlangonijr.chesslib.move.MoveGenerator
 
 class GameManager(
-        pieceTextures: Map<Piece, Texture>,
+        private val pieceTextures: Map<Piece, Texture>,
         greenDot: Texture,
         redDot: Texture,
-        boardTexture: Texture
+        boardTexture: Texture,
+        private val onPromote: (callback: (chosenPiece: Piece) -> Unit) -> Unit
 ): Widget() {
 
     object Size {
@@ -83,15 +84,27 @@ class GameManager(
         showMoves(square)
     }
 
-    private fun onTapDot(square: Square) {
+    private fun onTapDot(square: Square, isPromoting: Boolean, isCastling: Boolean) {
         if (selected != null) {
-            val move = Move(selected, square)
+            if(isPromoting) {
+                onPromote() { chosenPiece: Piece ->
+                    val move = Move(selected, square, chosenPiece)
 
-            if (indexedDots[square]?.isVisible == true) {
-                selected = null
-                greenDotGroup.children.map { it.isVisible = false }
-                boardState.doMove(move)
-                return
+                    if (indexedDots[square]?.isVisible == true) {
+                        selected = null
+                        greenDotGroup.children.map { it.isVisible = false }
+                        boardState.doMove(move)
+                    }
+                }
+            } else {
+                val move = Move(selected, square)
+
+                if (indexedDots[square]?.isVisible == true) {
+                    selected = null
+                    greenDotGroup.children.map { it.isVisible = false }
+                    boardState.doMove(move)
+                    return
+                }
             }
         }
     }
@@ -105,6 +118,21 @@ class GameManager(
 
         indexedPieces[move.to] = indexedPieces[move.from]!!
         indexedPieces.remove(move.from)
+
+        if(move.promotion != null && move.promotion != Piece.NONE) {
+            indexedPieces[move.to]!!.isVisible = false
+            pieceGroup.removeActor(indexedPieces[move.to]!!)
+
+            PieceActor(
+                    pieceTextures[move.promotion]!!,
+                    isPlayingWhites,
+                    this::onTapPiece
+            ).apply {
+                indexedPieces[move.to] = this
+                pieceGroup.addActor(this)
+                this.square = move.to
+            }
+        }
 
         if (boardState.isKingAttacked) {
             redDotActor.isVisible = true
@@ -148,10 +176,13 @@ class GameManager(
         }
         MoveGenerator
                 .generateLegalMoves(boardState)
+                .asSequence()
                 .filter { it.from == square }
-                .map { it.to }
-                .forEach {
-                    indexedDots[it]!!.isVisible = true
+                .map { (it.promotion != null && it.promotion != Piece.NONE) to it  }
+                .map { (isPromotion, move) -> isPromotion to move.to }
+                .forEach { (isPromotion, objective) ->
+                    indexedDots[objective]!!.isVisible = true
+                    indexedDots[objective]!!.isPromoting = isPromotion
                 }
     }
 }
