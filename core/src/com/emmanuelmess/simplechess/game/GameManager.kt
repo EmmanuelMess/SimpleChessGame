@@ -145,6 +145,16 @@ class GameManager(
             onMove(rookMove!!)
         }
 
+        //Hack for en passant case
+        pieceGroup.children.map {
+            it as PieceActor
+        }.filter {
+            val piece = boardState.getPiece(it.square)
+            piece == null || piece == Piece.NONE
+        }.forEach {
+            it.isVisible = false
+        }
+
         if (boardState.isKingAttacked) {
             redDotActor.isVisible = true
             redDotActor.square = boardState.getKingSquare(boardState.sideToMove)
