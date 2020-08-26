@@ -117,7 +117,6 @@ class MainMenuScreen(
             }).padTop(100f)
 
             setFillParent(true)
-            debug = true
         }
 
         stage.addActor(table)

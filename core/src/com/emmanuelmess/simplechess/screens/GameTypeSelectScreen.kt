@@ -130,7 +130,6 @@ class GameTypeSelectScreen(
                 })
             })
             setFillParent(true)
-            debug = true
         }
 
         stage.addActor(table)

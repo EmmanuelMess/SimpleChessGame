@@ -118,7 +118,6 @@ class GameManager(
 
         if(move.promotion != null && move.promotion != Piece.NONE) {
             indexedPieces[move.to]!!.isVisible = false
-            pieceGroup.removeActor(indexedPieces[move.to]!!)
 
             PieceActor(
                     pieceTextures[move.promotion]!!,
@@ -161,6 +160,8 @@ class GameManager(
         } else {
             redDotActor.isVisible = false
         }
+
+        pieceGroup.children.filter { !it.isVisible }.forEach { pieceGroup.removeActor(it) }
     }
 
     private fun unselect() {

@@ -187,7 +187,6 @@ class GameScreen(
                 listener(Connection::surrender)
             })
             setFillParent(true)
-            debug = true
         }
 
         stage.addActor(table)
@@ -209,7 +208,6 @@ class GameScreen(
                 })
             }
             setFillParent(true)
-            debug = true
             isVisible = false
         }
 
