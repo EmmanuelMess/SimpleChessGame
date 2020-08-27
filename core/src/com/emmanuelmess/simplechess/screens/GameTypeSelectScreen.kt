@@ -120,6 +120,7 @@ class GameTypeSelectScreen(
                 GameType(null, 30, 20, GameCategory.CLASSIC)
             )
             row()
+            /*TODO custom
             add(Label(globalData.translate["custom"], skin)).padTop(100f).left().colspan(3)
             row()
             add(TextButton("+", skin).apply {
@@ -129,6 +130,7 @@ class GameTypeSelectScreen(
                     }
                 })
             })
+            */
             setFillParent(true)
         }
 
