@@ -9,21 +9,21 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.Sprite
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
-import com.emmanuelmess.simplechess.*
-import com.emmanuelmess.simplechess.game.BoardActor
+import com.emmanuelmess.simplechess.Colors
+import com.emmanuelmess.simplechess.GlobalData
+import com.emmanuelmess.simplechess.Screen
 import com.emmanuelmess.simplechess.game.GameManager
 import com.emmanuelmess.simplechess.game.GameManager.Size.BOARD_WIDTH
 import com.emmanuelmess.simplechess.game.GameType
 import com.emmanuelmess.simplechess.game.SquareActor
-import com.emmanuelmess.simplechess.server.Connection
+import com.emmanuelmess.simplechess.listener
+import com.emmanuelmess.simplechess.net.Networking
 import com.github.bhlangonijr.chesslib.Piece
 import com.github.bhlangonijr.chesslib.Piece.*
 import com.github.bhlangonijr.chesslib.PieceType
@@ -178,13 +178,13 @@ class GameScreen(
             add(gameBoard).colspan(3).center()
             row()
             add(TextButton("undo", skin).apply {
-                listener(Connection::undo)
+                listener(globalData.connection::undo)
             })
             add(TextButton("draw", skin).apply {
-                listener(Connection::draw)
+                listener(globalData.connection::draw)
             })
             add(TextButton("surrender", skin).apply {
-                listener(Connection::surrender)
+                listener(globalData.connection::surrender)
             })
             setFillParent(true)
         }

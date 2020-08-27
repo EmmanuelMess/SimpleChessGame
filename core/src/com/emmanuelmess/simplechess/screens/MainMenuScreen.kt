@@ -95,23 +95,34 @@ class MainMenuScreen(
             setFillParent(true)
         })
 
+        val usernameText = TextField("", skin80)
+        val passText = TextField("", skin80).apply {
+            isPasswordMode = true
+        }
+
         val table = Table(skin80).apply {
             add(Label(globalData.translate["name"], skin120)).padTop(100f).expandX().top()
             row()
             add(Label(globalData.translate["username"], skin)).padTop(100f).left().expandX()
             row()
-            add(TextField("", skin)).fillX().left()
+            add(usernameText).fillX().left()
             row()
             add(Label(globalData.translate["password"], skin)).padTop(100f).left().expandX()
             row()
-            add(TextField("", skin).apply {
-                isPasswordMode = true
-            }).fillX().left()
+            add(passText).fillX().left()
             row()
             add(TextButton(globalData.translate["login"], skin).apply {
                 addListener(object : ChangeListener() {
                     override fun changed(event: ChangeEvent?, actor: Actor?) {
                         globalData.changeScreen(GameTypeSelectScreen(globalData))
+
+                        /*TODO
+                        globalData.connection.logIn(usernameText.text, passText.text, {
+                            globalData.changeScreen(GameTypeSelectScreen(globalData))
+                        }, {
+                            TODO()
+                        })
+                        */
                     }
                 })
             }).padTop(100f)

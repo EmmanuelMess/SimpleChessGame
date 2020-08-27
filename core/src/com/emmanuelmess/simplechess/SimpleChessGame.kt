@@ -8,9 +8,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.emmanuelmess.simplechess.net.Networking
 import com.emmanuelmess.simplechess.screens.MainMenuScreen
 
-class SimpleChessGame : ApplicationAdapter() {
+class SimpleChessGame(
+        val networking: Networking
+) : ApplicationAdapter() {
 
     object Size {
         const val WIDTH = 1440f
@@ -49,7 +52,8 @@ class SimpleChessGame : ApplicationAdapter() {
                         textViewport,
                         globalAssetManager["i18n/SimpleChess"],
                         this::changeScreen,
-                        viewport
+                        viewport,
+                        networking
                 )
         ))
     }
