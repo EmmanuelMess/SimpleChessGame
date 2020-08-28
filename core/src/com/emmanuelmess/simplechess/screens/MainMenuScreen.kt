@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.assets.loaders.TextureLoader
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
@@ -14,8 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
-import com.badlogic.gdx.utils.I18NBundle
-import com.badlogic.gdx.utils.viewport.FitViewport
 import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
 
@@ -38,12 +36,12 @@ class MainMenuScreen(
             load("icon/lichess grey.png", Texture::class.java, TextureLoader.TextureParameter())
 
             load("roboto-120.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
-                fontFileName = "fonts/roboto-light-latin.ttf"
+                fontFileName = "fonts/Roboto-Light.ttf"
                 fontParameters.size = 120
             })
 
             load("roboto-80.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
-                fontFileName = "fonts/roboto-light-latin.ttf"
+                fontFileName = "fonts/Roboto-Light.ttf"
                 fontParameters.size = 80
             })
 
@@ -51,41 +49,15 @@ class MainMenuScreen(
         }
 
         skin80 = Skin().apply {
-            add("default", Label.LabelStyle(assetManager.get<BitmapFont>("roboto-80.ttf"), Color.BLACK))
-            add("default", TextField.TextFieldStyle(
-                    assetManager.get<BitmapFont>("roboto-80.ttf"),
-                    Color.BLACK,
-                    null,
-                    null,
-                    null
-            ))
-            add("default", TextButton.TextButtonStyle(
-                    null,
-                    null,
-                    null,
-                    assetManager.get<BitmapFont>("roboto-80.ttf")
-            ).apply {
-                fontColor = Color.BLACK
-            })
+            add("default", assetManager.get<BitmapFont>("roboto-80.ttf"))
+            addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
+            load(Gdx.files.internal("skin/skin.skin"));
         }
 
         skin120 = Skin().apply {
-            add("default", Label.LabelStyle(assetManager.get<BitmapFont>("roboto-120.ttf"), Color.BLACK))
-            add("default", TextField.TextFieldStyle(
-                    assetManager.get<BitmapFont>("roboto-120.ttf"),
-                    Color.BLACK,
-                    null,
-                    null,
-                    null
-            ))
-            add("default", TextButton.TextButtonStyle(
-                    null,
-                    null,
-                    null,
-                    assetManager.get<BitmapFont>("roboto-120.ttf")
-            ).apply {
-                fontColor = Color.BLACK
-            })
+            add("default", assetManager.get<BitmapFont>("roboto-120.ttf"))
+            addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
+            load(Gdx.files.internal("skin/skin.skin"));
         }
 
         stage = Stage(globalData.textViewport)
@@ -97,6 +69,7 @@ class MainMenuScreen(
 
         val usernameText = TextField("", skin80)
         val passText = TextField("", skin80).apply {
+            setPasswordCharacter('*')
             isPasswordMode = true
         }
 
@@ -146,6 +119,7 @@ class MainMenuScreen(
     override fun dispose() {
         stage.dispose()
         skin80.dispose()
+        skin120.dispose()
         assetManager.dispose()
     }
 
