@@ -122,10 +122,19 @@ class GameScreen(
             add(gameBoard).colspan(3).center()
             row()
             add(TextButton("undo", skin).apply {
+                listener {
+                    gameBoard.undo()
+                }
             })
             add(TextButton("draw", skin).apply {
+                listener {
+                    gameBoard.gameEnded = true
+                }
             })
             add(TextButton("surrender", skin).apply {
+                listener {
+                    gameBoard.gameEnded = true
+                }
             })
             setFillParent(true)
         }

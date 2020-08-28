@@ -21,8 +21,14 @@ class GameManager(
         val BOARD_WIDTH = 1200
     }
 
-    val gameEnded = false
     val isPlayingWhites = true
+
+    var gameEnded = false
+        set(value) {
+            selected = null
+            greenDotGroup.children.map { it.isVisible = false }
+            field = value
+        }
 
     private val boardActor = BoardActor(boardTexture)
     private val boardState = Board().apply {
@@ -72,7 +78,15 @@ class GameManager(
         }
     }
 
+    public fun undo() {
+        TODO()
+    }
+
     private fun onTapPiece(square: Square) {
+        if(gameEnded) {
+            return
+        }
+
         if (selected == square) {
             selected = null
             greenDotGroup.children.map { it.isVisible = false }
