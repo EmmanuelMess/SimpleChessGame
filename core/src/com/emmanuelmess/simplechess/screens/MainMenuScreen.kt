@@ -23,8 +23,6 @@ class MainMenuScreen(
 ): Screen(globalData) {
     private lateinit var assetManager: AssetManager
     private lateinit var stage: Stage
-    private lateinit var skin80: Skin
-    private lateinit var skin120: Skin
 
     override fun create() {
         assetManager = AssetManager().apply {
@@ -33,48 +31,23 @@ class MainMenuScreen(
                 setLoader(BitmapFont::class.java, ".ttf", FreetypeFontLoader(it))
             }
 
-            load("icon/lichess grey.png", Texture::class.java, TextureLoader.TextureParameter())
-
-            load("roboto-120.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
-                fontFileName = "fonts/Roboto-Light.ttf"
-                fontParameters.size = 120
-            })
-
-            load("roboto-80.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
-                fontFileName = "fonts/Roboto-Light.ttf"
-                fontParameters.size = 80
-            })
-
             finishLoading()
-        }
-
-        skin80 = Skin().apply {
-            add("default", assetManager.get<BitmapFont>("roboto-80.ttf"))
-            addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
-            load(Gdx.files.internal("skin/skin.skin"));
-        }
-
-        skin120 = Skin().apply {
-            add("default", assetManager.get<BitmapFont>("roboto-120.ttf"))
-            addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
-            load(Gdx.files.internal("skin/skin.skin"));
         }
 
         stage = Stage(globalData.textViewport)
 
-        val img: Texture = assetManager["icon/lichess grey.png"]
-        stage.addActor(Container(Image(img)).apply {
+        stage.addActor(Container(Image(globalData.lichessIcon)).apply {
             setFillParent(true)
         })
 
-        val usernameText = TextField("", skin80)
-        val passText = TextField("", skin80).apply {
+        val usernameText = TextField("", globalData.skin80)
+        val passText = TextField("", globalData.skin80).apply {
             setPasswordCharacter('*')
             isPasswordMode = true
         }
 
-        val table = Table(skin80).apply {
-            add(Label(globalData.translate["name"], skin120)).padTop(100f).expandX().top()
+        val table = Table(globalData.skin80).apply {
+            add(Label(globalData.translate["name"], globalData.skin120)).padTop(100f).expandX().top()
             row()
             add(Label(globalData.translate["username"], skin)).padTop(100f).left().expandX()
             row()
@@ -118,8 +91,6 @@ class MainMenuScreen(
 
     override fun dispose() {
         stage.dispose()
-        skin80.dispose()
-        skin120.dispose()
         assetManager.dispose()
     }
 

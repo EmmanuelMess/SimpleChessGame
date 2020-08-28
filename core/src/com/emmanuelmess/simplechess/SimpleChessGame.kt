@@ -3,8 +3,17 @@ package com.emmanuelmess.simplechess
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.assets.loaders.TextureLoader
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
+import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -29,6 +38,9 @@ class SimpleChessGame(
 
     private lateinit var textViewport: FitViewport
 
+    private lateinit var skin80: Skin
+    private lateinit var skin120: Skin
+
     private var currentScreen: Screen? = null
 
     override fun create() {
@@ -43,14 +55,47 @@ class SimpleChessGame(
         textViewport = FitViewport(Size.WIDTH, Size.HEIGHT)
 
         globalAssetManager = AssetManager().apply {
+            InternalFileHandleResolver().also {
+                setLoader(FreeTypeFontGenerator::class.java, FreeTypeFontGeneratorLoader(it))
+                setLoader(BitmapFont::class.java, ".ttf", FreetypeFontLoader(it))
+            }
+
+            load("icon/lichess grey.png", Texture::class.java, TextureLoader.TextureParameter())
+
+            load("roboto-120.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
+                fontFileName = "fonts/Roboto-Light.ttf"
+                fontParameters.size = 120
+            })
+
+            load("roboto-80.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
+                fontFileName = "fonts/Roboto-Light.ttf"
+                fontParameters.size = 80
+            })
+
             load("i18n/SimpleChess", I18NBundle::class.java)
+
             finishLoading()
+        }
+
+        skin80 = Skin().apply {
+            add("default", globalAssetManager["roboto-80.ttf"])
+            addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
+            load(Gdx.files.internal("skin/skin.skin"));
+        }
+
+        skin120 = Skin().apply {
+            add("default", globalAssetManager["roboto-120.ttf"])
+            addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
+            load(Gdx.files.internal("skin/skin.skin"));
         }
 
         changeScreen(MainMenuScreen(
                 GlobalData(
                         textViewport,
                         globalAssetManager["i18n/SimpleChess"],
+                        globalAssetManager["icon/lichess grey.png"],
+                        skin80,
+                        skin120,
                         this::changeScreen,
                         viewport,
                         networking

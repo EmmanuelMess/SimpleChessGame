@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
@@ -36,8 +37,6 @@ class GameScreen(
     private lateinit var stage: Stage
     private lateinit var promotingSelection: Table
     private var promotionCallback: ((chosenPiece: Piece) -> Unit)? = null
-    private lateinit var skin80: Skin
-    private lateinit var skin120: Skin
     private lateinit var pieceTextures: Map<Piece, Texture>
     private lateinit var greenDotTexture: Texture
     private lateinit var redDotTexture: Texture
@@ -46,23 +45,6 @@ class GameScreen(
 
     override fun create() {
         assetManager = AssetManager().apply {
-            InternalFileHandleResolver().also {
-                setLoader(FreeTypeFontGenerator::class.java, FreeTypeFontGeneratorLoader(it))
-                setLoader(BitmapFont::class.java, ".ttf", FreetypeFontLoader(it))
-            }
-
-            load("icon/lichess grey.png", Texture::class.java, TextureLoader.TextureParameter())
-
-            load("roboto-120.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
-                fontFileName = "fonts/roboto-light-latin.ttf"
-                fontParameters.size = 120
-            })
-
-            load("roboto-80.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
-                fontFileName = "fonts/roboto-light-latin.ttf"
-                fontParameters.size = 80
-            })
-
             load("images/pieces/bB.png", Texture::class.java)
             load("images/pieces/bK.png", Texture::class.java)
             load("images/pieces/bN.png", Texture::class.java)
@@ -79,43 +61,6 @@ class GameScreen(
             finishLoading()
         }
 
-        skin80 = Skin().apply {
-            add("default", Label.LabelStyle(assetManager.get<BitmapFont>("roboto-80.ttf"), Color.BLACK))
-            add("default", TextField.TextFieldStyle(
-                    assetManager.get<BitmapFont>("roboto-80.ttf"),
-                    Color.BLACK,
-                    null,
-                    null,
-                    null
-            ))
-            add("default", TextButton.TextButtonStyle(
-                    null,
-                    null,
-                    null,
-                    assetManager.get<BitmapFont>("roboto-80.ttf")
-            ).apply {
-                fontColor = Color.BLACK
-            })
-        }
-
-        skin120 = Skin().apply {
-            add("default", Label.LabelStyle(assetManager.get<BitmapFont>("roboto-120.ttf"), Color.BLACK))
-            add("default", TextField.TextFieldStyle(
-                    assetManager.get<BitmapFont>("roboto-120.ttf"),
-                    Color.BLACK,
-                    null,
-                    null,
-                    null
-            ))
-            add("default", TextButton.TextButtonStyle(
-                    null,
-                    null,
-                    null,
-                    assetManager.get<BitmapFont>("roboto-120.ttf")
-            ).apply {
-                fontColor = Color.BLACK
-            })
-        }
         pieceTextures = mapOf(
                 BLACK_PAWN to assetManager["images/pieces/bP.png"],
                 BLACK_ROOK to  assetManager["images/pieces/bR.png"],
@@ -158,8 +103,7 @@ class GameScreen(
 
         stage = Stage(globalData.textViewport)
 
-        val img: Texture = assetManager["icon/lichess grey.png"]
-        stage.addActor(Container(Image(img)).apply {
+        stage.addActor(Container(Image(globalData.lichessIcon)).apply {
             setFillParent(true)
         })
 
@@ -168,8 +112,8 @@ class GameScreen(
             promotingSelection.isVisible = true
         }
 
-        val table = Table(skin80).apply {
-            add(Label(globalData.translate["game"], skin120)).colspan(3).left().top()
+        val table = Table(globalData.skin80).apply {
+            add(Label(globalData.translate["game"], globalData.skin120)).colspan(3).left().top()
             row().padTop(100f)
             add(Label("${gameType.time}:00", skin)).left()
             add()
@@ -191,8 +135,8 @@ class GameScreen(
 
         stage.addActor(table)
 
-        promotingSelection = Table(skin80).apply {
-            add(Label(globalData.translate["choose_piece"], skin120)).colspan(3).left().top()
+        promotingSelection = Table(globalData.skin80).apply {
+            add(Label(globalData.translate["choose_piece"], globalData.skin120)).colspan(3).left().top()
             row().padTop(100f)
 
             val pieces =
@@ -261,7 +205,6 @@ class GameScreen(
 
     override fun dispose() {
         stage.dispose()
-        skin80.dispose()
         assetManager.dispose()
     }
 }
