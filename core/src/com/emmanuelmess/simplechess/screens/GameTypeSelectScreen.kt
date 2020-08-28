@@ -91,11 +91,11 @@ class GameTypeSelectScreen(
         row()
         add(Label(globalData.translate[categoryName], skin)).padTop(100f).left().colspan(3)
         row()
-        add(buttonForGameType(a, skin))
-        add(buttonForGameType(b, skin))
+        add(buttonForGameType(a, skin)).height(200f).width(250f)
+        add(buttonForGameType(b, skin)).height(200f).width(250f)
 
         if (c != null) {
-            add(buttonForGameType(c, skin))
+            add(buttonForGameType(c, skin)).height(200f).width(250f)
         }
     }
 
