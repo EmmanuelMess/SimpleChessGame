@@ -71,6 +71,11 @@ class SimpleChessGame : ApplicationAdapter() {
                 fontParameters.size = 80
             })
 
+            load("roboto-bold-200.ttf", BitmapFont::class.java, FreetypeFontLoader.FreeTypeFontLoaderParameter().apply {
+                fontFileName = "fonts/Roboto-Bold.ttf"
+                fontParameters.size = 200
+            })
+
             load("i18n/SimpleChess", I18NBundle::class.java)
 
             finishLoading()
@@ -78,6 +83,7 @@ class SimpleChessGame : ApplicationAdapter() {
 
         skin80 = Skin().apply {
             add("default", globalAssetManager["roboto-80.ttf"])
+            add("boldbig", globalAssetManager["roboto-bold-200.ttf"])
             addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
             load(Gdx.files.internal("skin/skin.skin"));
         }

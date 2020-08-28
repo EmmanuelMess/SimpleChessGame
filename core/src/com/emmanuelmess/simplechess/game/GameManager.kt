@@ -15,7 +15,8 @@ class GameManager(
         redDot: Texture,
         boardTexture: Texture,
         private val onPromote: (callback: (chosenPiece: Piece) -> Unit) -> Unit,
-        private val onMoveFinished: (isPlayer: Boolean) -> Unit
+        private val onMoveFinished: (isPlayer: Boolean) -> Unit,
+        private val onGameFinished: (GameEndState) -> Unit
 ): Widget() {
 
     object Size {
@@ -24,11 +25,15 @@ class GameManager(
 
     val isPlayingWhites = true
 
-    var gameEnded = false
+    var gameEnded: GameEndState? = null
         set(value) {
+            if(value == null) throw NullPointerException()
+            if(field != null) return
+
             selected = null
             greenDotGroup.children.map { it.isVisible = false }
             field = value
+            onGameFinished(value)
         }
 
     private val boardActor = BoardActor(boardTexture)
@@ -84,7 +89,7 @@ class GameManager(
     }
 
     private fun onTapPiece(square: Square) {
-        if(gameEnded) {
+        if(gameEnded != null) {
             return
         }
 
@@ -182,6 +187,17 @@ class GameManager(
                 (boardState.getPiece(move.to).pieceSide == Side.WHITE && isPlayingWhites)
                         || (boardState.getPiece(move.to).pieceSide == Side.BLACK && !isPlayingWhites)
         )
+
+        if(boardState.isDraw) {
+            gameEnded = GameEndState.STALEMATE
+        } else if(boardState.isMated) {
+            val won = boardState.sideToMove
+            gameEnded = if((won == Side.WHITE && isPlayingWhites) || (won == Side.BLACK && !isPlayingWhites)) {
+                GameEndState.LOST
+            } else {
+                GameEndState.WON
+            }
+        }
     }
 
     private fun unselect() {

@@ -114,10 +114,10 @@ class GameScreen(
                 playerTime.start(TimeKeeper.getTime())
                 opponentTime.stop(TimeKeeper.getTime())
             }
-        })
+        }, this::onGameEnded)
 
-        playerTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, this::onGameFinished)
-        opponentTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, this::onGameFinished)
+        playerTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, { onTimerEnded(true) })
+        opponentTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, { onTimerEnded(false) })
 
         val table = Table(globalData.skin80).apply {
             add(Label(globalData.translate[gameType.category.readableName], globalData.skin120)).colspan(3).left().top()
@@ -135,12 +135,12 @@ class GameScreen(
             })
             add(TextButton("draw", skin).apply {
                 listener {
-                    gameBoard.gameEnded = true
+                    gameBoard.gameEnded = GameEndState.STALEMATE
                 }
             })
             add(TextButton("surrender", skin).apply {
                 listener {
-                    gameBoard.gameEnded = true
+                    gameBoard.gameEnded = GameEndState.LOST
                 }
             })
             setFillParent(true)
@@ -192,8 +192,26 @@ class GameScreen(
         Gdx.graphics.requestRendering();
     }
 
-    private fun onGameFinished() {
-        gameBoard.gameEnded = true
+    private fun onTimerEnded(isPlayerTimer: Boolean) {
+        gameBoard.gameEnded = if(isPlayerTimer) GameEndState.LOST else GameEndState.WON
+    }
+
+    private fun onGameEnded(gameEndState: GameEndState) {
+        playerTime.stop(TimeKeeper.getTime())
+        opponentTime.stop(TimeKeeper.getTime())
+
+        val rawText = when(gameEndState) {
+            GameEndState.WON -> "won"
+            GameEndState.LOST -> "lost"
+            GameEndState.STALEMATE -> "stalemate"
+        }
+
+        val gameEndedTable = Table(globalData.skin80).apply {
+            add(Label(globalData.translate[rawText], globalData.skin80, "boldbig", Color.RED)).center()
+            setFillParent(true)
+        }
+
+        stage.addActor(gameEndedTable)
     }
 
     private fun drawBoard(pixmap: Pixmap) {
