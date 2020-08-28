@@ -122,13 +122,10 @@ class GameScreen(
             add(gameBoard).colspan(3).center()
             row()
             add(TextButton("undo", skin).apply {
-                listener(globalData.connection::undo)
             })
             add(TextButton("draw", skin).apply {
-                listener(globalData.connection::draw)
             })
             add(TextButton("surrender", skin).apply {
-                listener(globalData.connection::surrender)
             })
             setFillParent(true)
         }

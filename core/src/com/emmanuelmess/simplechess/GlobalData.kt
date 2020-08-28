@@ -15,6 +15,5 @@ data class GlobalData(
         val skin80:  Skin,
         val skin120: Skin,
         val changeScreen: (Screen) -> Unit,
-        val viewport: FillViewport,
-        val connection: Networking
+        val viewport: FillViewport
 )

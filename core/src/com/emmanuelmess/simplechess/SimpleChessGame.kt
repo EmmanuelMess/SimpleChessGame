@@ -18,11 +18,10 @@ import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.emmanuelmess.simplechess.net.Networking
+import com.emmanuelmess.simplechess.screens.GameTypeSelectScreen
 import com.emmanuelmess.simplechess.screens.MainMenuScreen
 
-class SimpleChessGame(
-        val networking: Networking
-) : ApplicationAdapter() {
+class SimpleChessGame : ApplicationAdapter() {
 
     object Size {
         const val WIDTH = 1440f
@@ -89,7 +88,7 @@ class SimpleChessGame(
             load(Gdx.files.internal("skin/skin.skin"));
         }
 
-        changeScreen(MainMenuScreen(
+        changeScreen(GameTypeSelectScreen(
                 GlobalData(
                         textViewport,
                         globalAssetManager["i18n/SimpleChess"],
@@ -97,8 +96,7 @@ class SimpleChessGame(
                         skin80,
                         skin120,
                         this::changeScreen,
-                        viewport,
-                        networking
+                        viewport
                 )
         ))
     }

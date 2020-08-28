@@ -17,7 +17,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
 
-
+/**
+ * TODO implement connection to lichess
+ */
 class MainMenuScreen(
         private val globalData: GlobalData
 ): Screen(globalData) {

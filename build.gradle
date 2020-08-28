@@ -62,8 +62,6 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64"
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         api 'com.github.bhlangonijr:chesslib:1.1.20'
-        implementation "com.squareup.okhttp3:okhttp:4.8.1"
-        implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
     }
 }
 
