@@ -128,7 +128,7 @@ class GameScreen(
         opponentTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, this::onGameFinished)
 
         val table = Table(globalData.skin80).apply {
-            add(Label(globalData.translate["game"], globalData.skin120)).colspan(3).left().top()
+            add(Label(globalData.translate[gameType.category.readableName], globalData.skin120)).colspan(3).left().top()
             row().padTop(100f)
             add(opponentTime).left()
             add()

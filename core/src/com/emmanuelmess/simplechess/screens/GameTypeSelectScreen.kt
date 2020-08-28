@@ -2,12 +2,8 @@ package com.emmanuelmess.simplechess.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
-import com.badlogic.gdx.assets.loaders.TextureLoader
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
@@ -19,7 +15,6 @@ import com.emmanuelmess.simplechess.game.GameCategory
 import com.emmanuelmess.simplechess.game.GameType
 import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
-import java.util.concurrent.TimeUnit
 
 class GameTypeSelectScreen(
         private val globalData: GlobalData
@@ -46,27 +41,27 @@ class GameTypeSelectScreen(
             add(Label(globalData.translate["choose"], globalData.skin120)).padTop(100f).colspan(3).top()
             row()
             category(
-                    "bullet",
-                    GameType(null, 1, 0, GameCategory.BULLET),
-                    GameType(null, 2, 1, GameCategory.BULLET),
-                    GameType(null, 3, 0, GameCategory.BULLET)
+                    GameCategory.BULLET,
+                    GameType(1, 0, GameCategory.BULLET),
+                    GameType(2, 1, GameCategory.BULLET),
+                    GameType(3, 0, GameCategory.BULLET)
             )
             category(
-                    "blitz",
-                    GameType(null, 3, 2, GameCategory.BLITZ),
-                    GameType(null, 5, 0, GameCategory.BLITZ),
-                    GameType(null, 5, 3, GameCategory.BLITZ)
+                    GameCategory.BLITZ,
+                    GameType(3, 2, GameCategory.BLITZ),
+                    GameType(5, 0, GameCategory.BLITZ),
+                    GameType(5, 3, GameCategory.BLITZ)
             )
             category(
-                    "rapid",
-                    GameType(null, 10, 0, GameCategory.RAPID),
-                    GameType(null, 10, 5, GameCategory.RAPID),
-                    GameType(null, 15, 10, GameCategory.RAPID)
+                    GameCategory.RAPID,
+                    GameType(10, 0, GameCategory.RAPID),
+                    GameType(10, 5, GameCategory.RAPID),
+                    GameType(15, 10, GameCategory.RAPID)
             )
             category(
-                "classic",
-                GameType(null, 30, 0, GameCategory.CLASSIC),
-                GameType(null, 30, 20, GameCategory.CLASSIC)
+                    GameCategory.CLASSIC,
+                    GameType(30, 0, GameCategory.CLASSIC),
+                    GameType(30, 20, GameCategory.CLASSIC)
             )
             row()
             /*TODO custom
@@ -88,9 +83,9 @@ class GameTypeSelectScreen(
         Gdx.input.inputProcessor = stage
     }
 
-    private fun Table.category(categoryName: String, a: GameType, b: GameType, c: GameType? = null) {
+    private fun Table.category(category: GameCategory, a: GameType, b: GameType, c: GameType? = null) {
         row()
-        add(Label(globalData.translate[categoryName], skin)).padTop(100f).left().colspan(3)
+        add(Label(globalData.translate[category.readableName], skin)).padTop(100f).left().colspan(3)
         row()
         add(buttonForGameType(a, skin)).height(200f).width(250f)
         add(buttonForGameType(b, skin)).height(200f).width(250f)
