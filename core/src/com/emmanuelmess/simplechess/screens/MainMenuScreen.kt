@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.assets.loaders.TextureLoader
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
@@ -42,14 +43,14 @@ class MainMenuScreen(
             setFillParent(true)
         })
 
-        val usernameText = TextField("", globalData.skin80)
-        val passText = TextField("", globalData.skin80).apply {
+        val usernameText = TextField("", globalData.skin)
+        val passText = TextField("", globalData.skin).apply {
             setPasswordCharacter('*')
             isPasswordMode = true
         }
 
-        val table = Table(globalData.skin80).apply {
-            add(Label(globalData.translate["name"], globalData.skin120)).padTop(100f).expandX().top()
+        val table = Table(globalData.skin).apply {
+            add(Label(globalData.translate["name"], skin, "default120", Color.BLACK)).padTop(100f).expandX().top()
             row()
             add(Label(globalData.translate["username"], skin)).padTop(100f).left().expandX()
             row()

@@ -12,8 +12,7 @@ data class GlobalData(
         val textViewport: FitViewport,
         val translate: I18NBundle,
         val lichessIcon: Texture,
-        val skin80:  Skin,
-        val skin120: Skin,
+        val skin:  Skin,
         val changeScreen: (Screen) -> Unit,
         val viewport: FillViewport
 )

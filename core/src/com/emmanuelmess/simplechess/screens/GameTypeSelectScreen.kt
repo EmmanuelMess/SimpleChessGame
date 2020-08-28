@@ -3,6 +3,7 @@ package com.emmanuelmess.simplechess.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
@@ -37,8 +38,8 @@ class GameTypeSelectScreen(
             setFillParent(true)
         })
 
-        val table = Table(globalData.skin80).apply {
-            add(Label(globalData.translate["choose"], globalData.skin120)).padTop(100f).colspan(3).top()
+        val table = Table(globalData.skin).apply {
+            add(Label(globalData.translate["choose"], skin, "default120", Color.BLACK)).padTop(100f).colspan(3).top()
             row()
             category(
                     GameCategory.BULLET,

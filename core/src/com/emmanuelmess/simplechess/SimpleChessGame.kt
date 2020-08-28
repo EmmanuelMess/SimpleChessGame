@@ -17,9 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
-import com.emmanuelmess.simplechess.net.Networking
 import com.emmanuelmess.simplechess.screens.GameTypeSelectScreen
-import com.emmanuelmess.simplechess.screens.MainMenuScreen
 
 class SimpleChessGame : ApplicationAdapter() {
 
@@ -37,8 +35,7 @@ class SimpleChessGame : ApplicationAdapter() {
 
     private lateinit var textViewport: FitViewport
 
-    private lateinit var skin80: Skin
-    private lateinit var skin120: Skin
+    private lateinit var skin: Skin
 
     private var currentScreen: Screen? = null
 
@@ -81,15 +78,10 @@ class SimpleChessGame : ApplicationAdapter() {
             finishLoading()
         }
 
-        skin80 = Skin().apply {
+        skin = Skin().apply {
             add("default", globalAssetManager["roboto-80.ttf"])
+            add("default120", globalAssetManager["roboto-120.ttf"])
             add("boldbig", globalAssetManager["roboto-bold-200.ttf"])
-            addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
-            load(Gdx.files.internal("skin/skin.skin"));
-        }
-
-        skin120 = Skin().apply {
-            add("default", globalAssetManager["roboto-120.ttf"])
             addRegions(TextureAtlas(Gdx.files.internal("skin/skin.atlas")))
             load(Gdx.files.internal("skin/skin.skin"));
         }
@@ -99,8 +91,7 @@ class SimpleChessGame : ApplicationAdapter() {
                         textViewport,
                         globalAssetManager["i18n/SimpleChess"],
                         globalAssetManager["icon/lichess grey.png"],
-                        skin80,
-                        skin120,
+                        skin,
                         this::changeScreen,
                         viewport
                 )

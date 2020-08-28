@@ -116,11 +116,22 @@ class GameScreen(
             }
         }, this::onGameEnded)
 
-        playerTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, { onTimerEnded(true) })
-        opponentTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, { onTimerEnded(false) })
+        playerTime = TimeLabel(
+                MINUTES.toSeconds(gameType.time.toLong()),
+                gameType.timeAdded,
+                globalData.skin,
+                { onTimerEnded(true) }
+        )
+        opponentTime = TimeLabel(
+                MINUTES.toSeconds(gameType.time.toLong()),
+                gameType.timeAdded,
+                globalData.skin,
+                { onTimerEnded(false) }
+        )
 
-        val table = Table(globalData.skin80).apply {
-            add(Label(globalData.translate[gameType.category.readableName], globalData.skin120)).colspan(3).left().top()
+        val table = Table(globalData.skin).apply {
+            add(Label(globalData.translate[gameType.category.readableName], globalData.skin, "default120", Color.BLACK))
+                    .colspan(3).left().top()
             row().padTop(100f)
             add(opponentTime).left()
             add()
@@ -148,8 +159,8 @@ class GameScreen(
 
         stage.addActor(table)
 
-        promotingSelection = Table(globalData.skin80).apply {
-            add(Label(globalData.translate["choose_piece"], globalData.skin120)).colspan(3).left().top()
+        promotingSelection = Table(globalData.skin).apply {
+            add(Label(globalData.translate["choose_piece"], skin, "default120", Color.BLACK)).colspan(3).left().top()
             row().padTop(100f)
 
             val pieces =
@@ -206,8 +217,8 @@ class GameScreen(
             GameEndState.STALEMATE -> "stalemate"
         }
 
-        val gameEndedTable = Table(globalData.skin80).apply {
-            add(Label(globalData.translate[rawText], globalData.skin80, "boldbig", Color.RED)).center()
+        val gameEndedTable = Table(globalData.skin).apply {
+            add(Label(globalData.translate[rawText], skin, "boldbig", Color.RED)).center()
             setFillParent(true)
         }
 
