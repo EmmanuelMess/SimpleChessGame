@@ -2,6 +2,7 @@ package com.emmanuelmess.simplechess.screens
 
 import com.badlogic.gdx.*
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -54,6 +55,13 @@ class GameScreen(
             load("images/pieces/wQ.png", Texture::class.java)
             load("images/pieces/wR.png", Texture::class.java)
 
+            load("sound/Capture.ogg", Sound::class.java)
+            load("sound/Check.ogg", Sound::class.java)
+            load("sound/Defeat.ogg", Sound::class.java)
+            load("sound/Draw.ogg", Sound::class.java)
+            load("sound/Move.ogg", Sound::class.java)
+            load("sound/Victory.ogg", Sound::class.java)
+
             finishLoading()
         }
 
@@ -103,18 +111,32 @@ class GameScreen(
             setFillParent(true)
         })
 
-        gameBoard = GameManager(pieceTextures, greenDotTexture, redDotTexture, boardTexture, { callback: (chosenPiece: Piece) -> Unit ->
-            promotionCallback = callback
-            promotingSelection.isVisible = true
-        }, { isPlayer ->
-            if (isPlayer) {
-                playerTime.stop(TimeKeeper.getTime())
-                opponentTime.start(TimeKeeper.getTime())
-            } else {
-                playerTime.start(TimeKeeper.getTime())
-                opponentTime.stop(TimeKeeper.getTime())
-            }
-        }, this::onGameEnded)
+        gameBoard = GameManager(
+                pieceTextures,
+                greenDotTexture,
+                redDotTexture,
+                boardTexture,
+                assetManager["sound/Capture.ogg"],
+                assetManager["sound/Check.ogg"],
+                assetManager["sound/Defeat.ogg"],
+                assetManager["sound/Draw.ogg"],
+                assetManager["sound/Move.ogg"],
+                assetManager["sound/Victory.ogg"],
+                { callback: (chosenPiece: Piece) -> Unit ->
+                    promotionCallback = callback
+                    promotingSelection.isVisible = true
+                },
+                { isPlayer ->
+                    if (isPlayer) {
+                        playerTime.stop(TimeKeeper.getTime())
+                        opponentTime.start(TimeKeeper.getTime())
+                    } else {
+                        playerTime.start(TimeKeeper.getTime())
+                        opponentTime.stop(TimeKeeper.getTime())
+                    }
+                },
+                this::onGameEnded
+        )
 
         playerTime = TimeLabel(
                 MINUTES.toSeconds(gameType.time.toLong()),

@@ -1,5 +1,6 @@
 package com.emmanuelmess.simplechess.game
 
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -14,6 +15,12 @@ class GameManager(
         greenDot: Texture,
         redDot: Texture,
         boardTexture: Texture,
+        private val captureSound: Sound,
+        private val checkSound: Sound,
+        private val defeatSound: Sound,
+        private val drawSound: Sound,
+        private val moveSound: Sound,
+        private val victorySound: Sound,
         private val onPromote: (callback: (chosenPiece: Piece) -> Unit) -> Unit,
         private val onMoveFinished: (isPlayer: Boolean) -> Unit,
         private val onGameFinished: (GameEndState) -> Unit
@@ -29,6 +36,12 @@ class GameManager(
         set(value) {
             if(value == null) throw NullPointerException()
             if(field != null) return
+
+            when(value) {
+                GameEndState.WON -> victorySound.play()
+                GameEndState.LOST -> defeatSound.play()
+                GameEndState.STALEMATE -> drawSound.play()
+            }
 
             selected = null
             greenDotGroup.children.map { it.isVisible = false }
@@ -127,10 +140,14 @@ class GameManager(
     }
 
     private fun onMove(move: Move) {
+        var soundHasPlayed = false
+
         indexedPieces[move.from]!!.square = move.to
 
         if (indexedPieces[move.to] != null) {
             indexedPieces[move.to]!!.isVisible = false
+            captureSound.play()
+            soundHasPlayed = true
         }
 
         indexedPieces[move.to] = indexedPieces[move.from]!!
@@ -172,11 +189,15 @@ class GameManager(
             piece == null || piece == Piece.NONE
         }.forEach {
             it.isVisible = false
+            captureSound.play()
+            soundHasPlayed = true
         }
 
         if (boardState.isKingAttacked) {
             redDotActor.isVisible = true
             redDotActor.square = boardState.getKingSquare(boardState.sideToMove)
+            checkSound.play()
+            soundHasPlayed = true
         } else {
             redDotActor.isVisible = false
         }
@@ -190,6 +211,7 @@ class GameManager(
 
         if(boardState.isDraw) {
             gameEnded = GameEndState.STALEMATE
+            soundHasPlayed = true
         } else if(boardState.isMated) {
             val won = boardState.sideToMove
             gameEnded = if((won == Side.WHITE && isPlayingWhites) || (won == Side.BLACK && !isPlayingWhites)) {
@@ -197,6 +219,11 @@ class GameManager(
             } else {
                 GameEndState.WON
             }
+            soundHasPlayed = true
+        }
+
+        if(!soundHasPlayed) {
+            moveSound.play()
         }
     }
 
