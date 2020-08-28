@@ -1,18 +1,11 @@
 package com.emmanuelmess.simplechess.screens
 
-import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.*
 import com.badlogic.gdx.assets.AssetManager
-import com.badlogic.gdx.assets.loaders.TextureLoader
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.Sprite
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader
-import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable
@@ -22,12 +15,11 @@ import com.emmanuelmess.simplechess.Screen
 import com.emmanuelmess.simplechess.game.*
 import com.emmanuelmess.simplechess.game.GameManager.Size.BOARD_WIDTH
 import com.emmanuelmess.simplechess.listener
-import com.emmanuelmess.simplechess.net.Networking
 import com.github.bhlangonijr.chesslib.Piece
 import com.github.bhlangonijr.chesslib.Piece.*
 import com.github.bhlangonijr.chesslib.PieceType
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MINUTES
+
 
 class GameScreen(
         private val globalData: GlobalData,
@@ -67,8 +59,8 @@ class GameScreen(
 
         pieceTextures = mapOf(
                 BLACK_PAWN to assetManager["images/pieces/bP.png"],
-                BLACK_ROOK to  assetManager["images/pieces/bR.png"],
-                BLACK_BISHOP to  assetManager["images/pieces/bB.png"],
+                BLACK_ROOK to assetManager["images/pieces/bR.png"],
+                BLACK_BISHOP to assetManager["images/pieces/bB.png"],
                 BLACK_KNIGHT to assetManager["images/pieces/bN.png"],
                 BLACK_QUEEN to assetManager["images/pieces/bQ.png"],
                 BLACK_KING to assetManager["images/pieces/bK.png"],
@@ -99,7 +91,7 @@ class GameScreen(
                     setOf(PieceType.BISHOP, PieceType.QUEEN, PieceType.KNIGHT, PieceType.ROOK).contains(it.key.pieceType)
                 }.map { (piece, texture) ->
                     piece to Sprite(texture).apply {
-                        setSize((BOARD_WIDTH/4).toFloat(), (BOARD_WIDTH/4).toFloat())
+                        setSize((BOARD_WIDTH / 4).toFloat(), (BOARD_WIDTH / 4).toFloat())
                     }
                 }.map { (piece, sprite) ->
                     piece to SpriteDrawable(sprite)
@@ -114,8 +106,8 @@ class GameScreen(
         gameBoard = GameManager(pieceTextures, greenDotTexture, redDotTexture, boardTexture, { callback: (chosenPiece: Piece) -> Unit ->
             promotionCallback = callback
             promotingSelection.isVisible = true
-        }, {isPlayer ->
-            if(isPlayer) {
+        }, { isPlayer ->
+            if (isPlayer) {
                 playerTime.stop(TimeKeeper.getTime())
                 opponentTime.start(TimeKeeper.getTime())
             } else {
@@ -165,7 +157,7 @@ class GameScreen(
                     else listOf(BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN)
             pieces.forEach {
                 add(ImageButton(popupPieceTextures[it]).apply {
-                    image.width = (BOARD_WIDTH/4).toFloat()
+                    image.width = (BOARD_WIDTH / 4).toFloat()
                     listener {
                         promotingSelection.isVisible = false
                         promotionCallback?.invoke(it)
@@ -178,7 +170,18 @@ class GameScreen(
 
         stage.addActor(promotingSelection)
 
-        Gdx.input.inputProcessor = stage
+        val backProcessor: InputProcessor = object : InputAdapter() {
+            override fun keyDown(keycode: Int): Boolean {
+                if (keycode == Input.Keys.BACK) {
+                    globalData.changeScreen(GameTypeSelectScreen(globalData))
+                    return true
+                }
+                return false
+            }
+        }
+
+        Gdx.input.inputProcessor = InputMultiplexer(stage, backProcessor)
+        Gdx.input.setCatchKey(Input.Keys.BACK, true)
 
         timeKeeper = TimeKeeper(this::onTick)
     }
@@ -237,6 +240,7 @@ class GameScreen(
     }
 
     override fun dispose() {
+        Gdx.input.setCatchKey(Input.Keys.BACK, false)
         stage.dispose()
         assetManager.dispose()
         timeKeeper.kill()
