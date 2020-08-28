@@ -14,7 +14,8 @@ class GameManager(
         greenDot: Texture,
         redDot: Texture,
         boardTexture: Texture,
-        private val onPromote: (callback: (chosenPiece: Piece) -> Unit) -> Unit
+        private val onPromote: (callback: (chosenPiece: Piece) -> Unit) -> Unit,
+        private val onMoveFinished: (isPlayer: Boolean) -> Unit
 ): Widget() {
 
     object Size {
@@ -176,6 +177,11 @@ class GameManager(
         }
 
         pieceGroup.children.filter { !it.isVisible }.forEach { pieceGroup.removeActor(it) }
+
+        onMoveFinished(
+                (boardState.getPiece(move.to).pieceSide == Side.WHITE && isPlayingWhites)
+                        || (boardState.getPiece(move.to).pieceSide == Side.BLACK && !isPlayingWhites)
+        )
     }
 
     private fun unselect() {

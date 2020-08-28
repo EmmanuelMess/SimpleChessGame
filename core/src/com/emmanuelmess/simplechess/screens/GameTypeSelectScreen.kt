@@ -19,6 +19,7 @@ import com.emmanuelmess.simplechess.game.GameCategory
 import com.emmanuelmess.simplechess.game.GameType
 import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
+import java.util.concurrent.TimeUnit
 
 class GameTypeSelectScreen(
         private val globalData: GlobalData

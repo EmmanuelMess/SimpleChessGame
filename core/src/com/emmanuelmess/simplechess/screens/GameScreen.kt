@@ -19,15 +19,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable
 import com.emmanuelmess.simplechess.Colors
 import com.emmanuelmess.simplechess.GlobalData
 import com.emmanuelmess.simplechess.Screen
-import com.emmanuelmess.simplechess.game.GameManager
+import com.emmanuelmess.simplechess.game.*
 import com.emmanuelmess.simplechess.game.GameManager.Size.BOARD_WIDTH
-import com.emmanuelmess.simplechess.game.GameType
-import com.emmanuelmess.simplechess.game.SquareActor
 import com.emmanuelmess.simplechess.listener
 import com.emmanuelmess.simplechess.net.Networking
 import com.github.bhlangonijr.chesslib.Piece
 import com.github.bhlangonijr.chesslib.Piece.*
 import com.github.bhlangonijr.chesslib.PieceType
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MINUTES
 
 class GameScreen(
         private val globalData: GlobalData,
@@ -36,12 +36,16 @@ class GameScreen(
     private lateinit var assetManager: AssetManager
     private lateinit var stage: Stage
     private lateinit var promotingSelection: Table
+    private lateinit var gameBoard: GameManager
     private var promotionCallback: ((chosenPiece: Piece) -> Unit)? = null
     private lateinit var pieceTextures: Map<Piece, Texture>
     private lateinit var greenDotTexture: Texture
     private lateinit var redDotTexture: Texture
     private lateinit var boardTexture: Texture
     private lateinit var popupPieceTextures: Map<Piece, SpriteDrawable>
+    private lateinit var playerTime: TimeLabel
+    private lateinit var opponentTime: TimeLabel
+    private lateinit var timeKeeper: TimeKeeper
 
     override fun create() {
         assetManager = AssetManager().apply {
@@ -107,17 +111,28 @@ class GameScreen(
             setFillParent(true)
         })
 
-        val gameBoard = GameManager(pieceTextures, greenDotTexture, redDotTexture, boardTexture) { callback: (chosenPiece: Piece) -> Unit ->
+        gameBoard = GameManager(pieceTextures, greenDotTexture, redDotTexture, boardTexture, { callback: (chosenPiece: Piece) -> Unit ->
             promotionCallback = callback
             promotingSelection.isVisible = true
-        }
+        }, {isPlayer ->
+            if(isPlayer) {
+                playerTime.stop(TimeKeeper.getTime())
+                opponentTime.start(TimeKeeper.getTime())
+            } else {
+                playerTime.start(TimeKeeper.getTime())
+                opponentTime.stop(TimeKeeper.getTime())
+            }
+        })
+
+        playerTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, this::onGameFinished)
+        opponentTime = TimeLabel(MINUTES.toSeconds(gameType.time.toLong()), gameType.timeAdded, globalData.skin80, this::onGameFinished)
 
         val table = Table(globalData.skin80).apply {
             add(Label(globalData.translate["game"], globalData.skin120)).colspan(3).left().top()
             row().padTop(100f)
-            add(Label("${gameType.time}:00", skin)).left()
+            add(opponentTime).left()
             add()
-            add(Label("${gameType.time}:00", skin)).right()
+            add(playerTime).right()
             row()
             add(gameBoard).colspan(3).center()
             row()
@@ -164,6 +179,18 @@ class GameScreen(
         stage.addActor(promotingSelection)
 
         Gdx.input.inputProcessor = stage
+
+        timeKeeper = TimeKeeper(this::onTick)
+    }
+
+    private fun onTick(tick: Long) {
+        opponentTime.update(tick)
+        playerTime.update(tick)
+        Gdx.graphics.requestRendering();
+    }
+
+    private fun onGameFinished() {
+        gameBoard.gameEnded = true
     }
 
     private fun drawBoard(pixmap: Pixmap) {
@@ -212,5 +239,6 @@ class GameScreen(
     override fun dispose() {
         stage.dispose()
         assetManager.dispose()
+        timeKeeper.kill()
     }
 }
